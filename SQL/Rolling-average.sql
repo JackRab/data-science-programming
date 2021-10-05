@@ -13,13 +13,21 @@
 
 *Task*: Write a query to get 7-day rolling (preceding) average of daily sign ups. 
 */
--- can also be solved using self-join
 WITH signups AS (
     SELECT DATE(starttime) AS date, SUM(slots) AS sign_ups
     FROM bookings
     GROUP BY 1
     ORDER BY 1
 )
+-- solution 1: self-join
+SELECT a.date, AVG(b.sign_ups) AS avg_sign_ups
+FROM signups AS a 
+JOIN signups AS b 
+ON DATEDIFF(a.date, b.date)>=0 AND DATEDIFF(a.date, b.date)<=6
+GROUP BY 1
+ORDER BY 1;
+
+-- solution 2: window function
 SELECT date, AVG(sign_ups) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS avg_sign_ups
 FROM signups
 ORDER BY 1;
